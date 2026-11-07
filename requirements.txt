@@ -1,0 +1,13 @@
+# Runtime dependencies for MobMaker.
+#
+# The web server (server.py), mob file handling (mob_file.py), and generation
+# orchestration (process.py) use only the Python standard library, so the app
+# runs without these.
+#
+# These two packages are needed only for the AI generation features in
+# generation.py (creating figure descriptions, reference images, and STL
+# models).  Install them with:
+#     pip install -r requirements.txt
+
+google-genai
+pillow

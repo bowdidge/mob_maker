@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MobMaker</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --panel: #ffffff;
+    --ink: #1f2430;
+    --muted: #6b7280;
+    --line: #e2e5ea;
+    --accent: #2f6df6;
+    --accent-soft: #e8effd;
+    --star: #f5b301;
+    --frown: #9aa1ad;
+    --danger: #d64545;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
+
+  header.app {
+    display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px;
+  }
+  header.app h1 { font-size: 24px; margin: 0; letter-spacing: -0.02em; }
+  header.app .tag {
+    font-size: 12px; color: var(--muted);
+    border: 1px solid var(--line); background: var(--panel);
+    padding: 2px 8px; border-radius: 999px;
+  }
+
+  .mock-banner {
+    background: var(--accent-soft); color: #1e3a8a;
+    border: 1px solid #c7d8fb; border-radius: var(--radius);
+    padding: 8px 14px; font-size: 13px; margin: 14px 0 8px;
+  }
+  .mock-banner.warn { background: #fdecec; border-color: #f3c1c1; color: #8a2424; }
+  .save-status { min-height: 18px; font-size: 12.5px; color: var(--muted); margin: 0 0 12px; }
+  .save-status.ok { color: #1a7f37; }
+  .save-status.err { color: var(--danger); }
+
+  /* Top theme pane */
+  .theme-pane {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 24px;
+  }
+  .theme-pane label { display: block; font-weight: 600; margin-bottom: 8px; }
+  .theme-grid { display: grid; grid-template-columns: 1fr 220px; gap: 16px; align-items: start; }
+  textarea#theme {
+    width: 100%; min-height: 90px; resize: vertical;
+    border: 1px solid var(--line); border-radius: 10px; padding: 12px;
+    font: inherit; color: var(--ink); background: #fbfbfc;
+  }
+  textarea#theme:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .photo-drop {
+    border: 2px dashed var(--line); border-radius: 10px; min-height: 90px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 13px; text-align: center; padding: 12px;
+    background: #fbfbfc; cursor: pointer; transition: border-color .15s;
+  }
+  .photo-drop:hover, .photo-drop.has { border-color: var(--accent); color: var(--accent); }
+  .photo-drop .ico { font-size: 22px; margin-bottom: 6px; }
+
+  .actions { display: flex; gap: 10px; margin-top: 14px; }
+  button.btn {
+    font: inherit; cursor: pointer; border-radius: 10px; padding: 9px 16px;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  }
+  button.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  button.btn:active { transform: translateY(1px); }
+
+  /* Description rows */
+  .rows { display: flex; flex-direction: column; gap: 12px; }
+  .row {
+    display: grid; grid-template-columns: 150px 1fr 220px; gap: 14px;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 14px; align-items: stretch;
+    transition: opacity .15s, box-shadow .15s;
+  }
+  .row.starred { box-shadow: 0 0 0 2px var(--star) inset; }
+  .row.frown { opacity: 0.5; }
+
+  .cell { min-width: 0; }
+  .cell.controls { display: flex; flex-direction: column; gap: 8px; }
+  .iconbtn {
+    display: flex; align-items: center; gap: 8px;
+    font: inherit; font-size: 13px; cursor: pointer;
+    border: 1px solid var(--line); background: #fbfbfc; color: var(--ink);
+    border-radius: 8px; padding: 7px 10px; text-align: left;
+  }
+  .iconbtn:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .iconbtn .glyph { font-size: 15px; width: 18px; text-align: center; }
+  .iconbtn.on { background: var(--star); border-color: var(--star); color: #fff; cursor: default; }
+  .iconbtn.on:hover { background: var(--star); border-color: var(--star); color: #fff; }
+  .iconbtn.on .glyph { color: #fff; }
+  .iconbtn.on.on--frown { background: var(--frown); border-color: var(--frown); }
+  .iconbtn.on.on--frown:hover { background: var(--frown); border-color: var(--frown); }
+
+  .cell.desc {
+    border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+    background: #fbfbfc; min-height: 70px; overflow: auto;
+  }
+  .cell.desc[contenteditable="true"]:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .cell.image {
+    display: flex; align-items: center; justify-content: center;
+    border: 1px dashed var(--line); border-radius: 10px; min-height: 120px;
+    background: #fbfbfc; position: relative;
+  }
+  .cell.image .empty { color: var(--muted); font-size: 13px; }
+  .cell.image .silhouette { width: 72px; height: 120px; }
+  .cell.image img.refimg {
+    width: 100%; height: 100%; min-height: 120px; max-width: 220px;
+    object-fit: contain; border-radius: 6px;
+  }
+  .cell.image .badge-stl {
+    position: absolute; bottom: 8px; left: 8px; font-size: 11px;
+    background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 999px;
+    text-decoration: none;
+  }
+  .cell.image .badge-stl:hover { background: #1b53c7; }
+  .row-head {
+    grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between;
+    font-size: 12px; color: var(--muted); margin-bottom: 2px;
+  }
+  .row-head .fig-name {
+    max-width: 100%; color: var(--ink); font-weight: 600;
+    cursor: text; border-radius: 6px; padding: 1px 5px;
+  }
+  .row-head .fig-name:hover { background: var(--accent-soft); outline: 1px dashed var(--accent); }
+  .row-head .fig-name:focus { outline: 2px solid var(--accent); outline-offset: 0; background: #fff; }
+  .row-head .fig-name:empty::before { content: "(no name — click to add)"; color: var(--muted); font-weight: 400; }
+  @media (max-width: 760px) {
+    .row { grid-template-columns: 1fr; }
+    .theme-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app">
+    <h1>MobMaker</h1>
+    <span class="tag">background figures for model railroads</span>
+  </header>
+
+  <div class="mock-banner" id="dataBanner"></div>
+  <div class="save-status" id="saveStatus"></div>
+
+  <!-- Top theme pane -->
+  <section class="theme-pane">
+    <label for="theme">Theme / setting</label>
+    <div class="theme-grid">
+      <textarea id="theme" placeholder="e.g. 1930s passengers at a small-town California train station"></textarea>
+      <div class="photo-drop" id="photoDrop" title="Optional reference photo">
+        <div class="ico">🖼️</div>
+        <div>Drop or click for a<br>reference photo (optional)</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="genBtn">Generate descriptions</button>
+      <button class="btn" id="addBtn">Generate another set</button>
+    </div>
+  </section>
+
+  <!-- Description rows -->
+  <div class="rows" id="rows"></div>
+</div>
+
+<!-- MOB_DATA -->
+<script>
+// The figures below come from the mob's mob_description.json: the server
+// loads it with mob_file and injects it here as window.MOB_DATA, then
+// `refresh()` re-fetches it over the REST API so every action here
+// round-trips to the file on disk.
+let mobData = window.MOB_DATA || { mob_name: "", current_theme: "", figures: [], error: "no mob data injected" };
+
+const rowsEl = document.getElementById('rows');
+const themeEl = document.getElementById('theme');
+const banner = document.getElementById('dataBanner');
+
+// ---- small helpers -----------------------------------------------------
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;',
+  }[c]));
+}
+
+function setStatus(kind, msg) {
+  const el = document.getElementById('saveStatus');
+  el.className = 'save-status ' + (kind || '');
+  el.textContent = msg;
+}
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+  return data;
+}
+
+function silhouette() {
+  return `<svg class="silhouette" viewBox="0 0 100 160" aria-hidden="true">
+    <circle cx="50" cy="26" r="17" fill="#b7bcc6"/>
+    <path d="M22 150 C22 100 33 82 50 82 C67 82 78 100 78 150 Z" fill="#b7bcc6"/>
+  </svg>`;
+}
+
+function setBanner() {
+  banner.className = 'mock-banner' + (mobData.error ? ' warn' : '');
+  if (mobData.error) {
+    banner.innerHTML = `<strong>Could not load the mob file:</strong> ${esc(mobData.error)}`;
+  } else {
+    banner.textContent = `Editing mob "${mobData.mob_name}" — changes are saved to mob_description.json via the REST API.`;
+  }
+}
+
+// ---- loading / rendering -----------------------------------------------
+async function refresh() {
+  try {
+    mobData = await api('/api/mob');
+    themeEl.value = mobData.current_theme;
+    setBanner();
+    render();
+  } catch (e) {
+    setBanner();
+    setStatus('err', 'Failed to load mob: ' + e.message);
+  }
+}
+
+// Regenerating an image overwrites the file in place under the same name, so
+// its URL never changes and the browser may keep showing a stale copy.  To
+// force it to reload in place, the image element carries a ``data-id`` so
+// reloadImage() can reassign its ``src`` with a fresh cache-busting query
+// string, making the browser fetch + repaint the updated file.
+function imageCell(f) {
+  if (f.image_file) {
+    const img = `<img class="refimg" data-id="${f.id}" src="/api/files/${encodeURIComponent(f.image_file)}" alt="reference image">`;
+    const badge = f.stl_file
+      ? `<a class="badge-stl" href="/api/files/${encodeURIComponent(f.stl_file)}" title="Download STL file">→ STL</a>`
+      : '';
+    return img + badge;
+  }
+  return '<span class="empty">No image yet</span>';
+}
+
+function controls(f) {
+  const status = f.interesting ? 'star' : (f.not_interesting ? 'frown' : 'none');
+  const b = (glyph, label, key, on, variant) =>
+    `<button class="iconbtn ${on ? ('on on--' + variant) : ''}" data-act="${key}" data-id="${f.id}" title="${label}">
+      <span class="glyph">${glyph}</span><span>${label}</span></button>`;
+  return [
+    b('🗑️', 'Delete', 'delete', false),
+    b('⭐', 'Interesting', 'star', status === 'star', 'star'),
+    b('☹️', 'Uninteresting', 'frown', status === 'frown', 'frown'),
+    b('🖼️', 'Image', 'image', false),
+    b('🖨️', 'Tripo3D', 'stl', Boolean(f.stl_file)),
+  ].join('');
+}
+
+function render() {
+  rowsEl.innerHTML = mobData.figures.map(f => {
+    const status = f.interesting ? 'star' : (f.not_interesting ? 'frown' : 'none');
+    return `
+    <div class="row ${status === 'star' ? 'starred' : ''} ${status === 'frown' ? 'frown' : ''}" data-row="${f.id}">
+      <div class="row-head">
+        <span class="fig-name" contenteditable="true" data-name="${f.id}" title="Click to edit the figure's name">${esc(f.name || '')}</span>
+      </div>
+      <div class="cell controls">${controls(f)}</div>
+      <div class="cell desc" contenteditable="true" data-desc="${f.id}">${esc(f.description || f.name || '')}</div>
+      <div class="cell image" data-image="${f.id}">${imageCell(f)}</div>
+    </div>`;
+  }).join('');
+}
+
+function find(id) { return mobData.figures.find(f => f.id == id); }
+
+// ---- figure actions (round-tripped via the API) ------------------------
+// Fetch the current image for *id* and repaint its <img> in place, ignoring
+// whatever the browser has cached for the (unchanging) file URL.
+function reloadImage(id) {
+  const img = document.querySelector(`img.refimg[data-id="${id}"]`);
+  if (!img) return;
+  const url = img.src.split('?')[0];  // strip any prior cache-buster
+  img.src = url + '?t=' + Date.now();
+}
+
+async function patchFigure(id, body) {
+  setStatus('', 'Saving…');
+  try {
+    mobData = await api('/api/figures/' + id, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    render();
+    setStatus('ok', 'Saved.');
+  } catch (e) {
+    setStatus('err', 'Save failed: ' + e.message);
+  }
+}
+
+rowsEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('button.iconbtn');
+  if (!btn) return;
+  const f = find(btn.dataset.id);
+  if (!f) return;
+  const act = btn.dataset.act;
+
+  if (act === 'delete') {
+    setStatus('', 'Deleting…');
+    api('/api/figures/' + f.id, { method: 'DELETE' })
+      .then(d => { mobData = d; render(); setStatus('ok', 'Deleted.'); })
+      .catch(err => setStatus('err', 'Delete failed: ' + err.message));
+  } else if (act === 'star') {
+    // Send the new value; the server clears the "not interesting" flag too.
+    patchFigure(f.id, { interesting: !f.interesting });
+  } else if (act === 'frown') {
+    patchFigure(f.id, { not_interesting: !f.not_interesting });
+  } else if (act === 'image') {
+    setStatus('', 'Generating image…');
+    // We decide how to update the DOM from the pre-generation figure *f*:
+    // if it already had an image there is an <img> to repaint in place;
+    // if not, there is only a "No image yet" placeholder, so render() the
+    // row to insert the fresh <img> tag.
+    const hadImage = Boolean(f.image_file);
+    api('/api/figures/' + f.id + '/image', { method: 'POST' })
+      .then(d => {
+        mobData = d;
+        if (hadImage) {
+          reloadImage(f.id);  // existing <img>: repaint with the fresh file
+        } else {
+          render();           // no <img> yet: build the row anew
+        }
+        setStatus('ok', 'Image ready.');
+      })
+      .catch(err => setStatus('err', 'Image failed: ' + err.message));
+  } else if (act === 'stl') {
+    if (!f.image_file) { setStatus('err', 'Generate a reference image first.'); return; }
+    setStatus('', 'Generating STL… (may take a while)');
+    api('/api/figures/' + f.id + '/stl', { method: 'POST' })
+      .then(d => { mobData = d; render(); setStatus('ok', 'STL ready.'); })
+      .catch(err => setStatus('err', 'STL failed: ' + err.message));
+  }
+});
+
+// Save a name or description when its editor loses focus.
+rowsEl.addEventListener('blur', (e) => {
+  const nameCell = e.target.closest('[data-name]');
+  if (nameCell) {
+    const f = find(nameCell.dataset.name);
+    const name = (f ? nameCell.innerText : '').trim();
+    if (f && name !== (f.name || '')) patchFigure(f.id, { name });
+    return;
+  }
+  const cell = e.target.closest('[data-desc]');
+  if (!cell) return;
+  const f = find(cell.dataset.desc);
+  if (!f) return;
+  const text = cell.innerText;
+  if (text !== f.description) patchFigure(f.id, { description: text });
+}, true);
+
+// Save the theme when the textarea loses focus.
+themeEl.addEventListener('blur', () => {
+  setStatus('', 'Saving theme…');
+  api('/api/mob', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ current_theme: themeEl.value }),
+  }).then(() => setStatus('ok', 'Theme saved.'))
+    .catch(err => setStatus('err', 'Theme save failed: ' + err.message));
+});
+
+// Generate figures from the current theme via the server (LLM).
+// Both "Generate descriptions" and "Generate another set" do this.
+async function generateDescriptions() {
+  setStatus('', 'Generating descriptions…');
+  try {
+    mobData = await api('/api/mob/descriptions', { method: 'POST' });
+    setBanner();
+    render();
+    setStatus('ok', 'Generated. Figures now: ' + mobData.figures.length);
+  } catch (e) {
+    setStatus('err', 'Generation failed: ' + e.message);
+  }
+}
+document.getElementById('genBtn').addEventListener('click', generateDescriptions);
+document.getElementById('addBtn').addEventListener('click', generateDescriptions);
+
+// Optional photo drop zone (visual only).
+const drop = document.getElementById('photoDrop');
+drop.addEventListener('click', () => drop.classList.toggle('has'));
+
+// Kick off: render the injected snapshot, then re-fetch fresh state.
+render();
+setBanner();
+refresh();
+</script>
+</body>
+</html>

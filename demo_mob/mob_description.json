@@ -1,0 +1,35 @@
+{
+    "mob_name": "1930s cannery figures",
+    "current_theme": "The figures should represent workers walking into a California fruit cannery in the 1930s.  Woman should be dressed in knee length dresses and occasionally pants, with apronts and sometimes nurses caps on their head.  Men should be dressed in typical men's work wear - rough pants, shirts, flat caps or fedoras for some men.  Some women should be office workers or floor ladys (managing the canning line).  Some men should appear to be foremen or executives.",
+    "figures": [
+        {
+            "id": "foreman-bob-37aa1a",
+            "name": "foreman_bob",
+            "description": "a tall, sturdy  man with his arms crossed wearing a fedora and a workshirt with the sleeves rolled up.  He is wearing jeans and boots.  His pose is as if he's waiting",
+            "interesting": false,
+            "not_interesting": false,
+            "image_file": "foreman_bob_reference.jpg"
+        },
+        {
+            "id": "young-cannery-woman-49bfb0",
+            "name": "young_cannery_woman",
+            "description": " A slender, early-20s female dressed in a faded blue knee-length cotton dress, a stained white half-apron, and a white nurse-style cap, captured mid-stride carrying a small metal lunch tin in her left hand.",
+            "interesting": false,
+            "not_interesting": false
+        },
+        {
+            "id": "working-man-walking-7a5e17",
+            "name": "working_man_walking",
+            "description": " A stocky, late-30s male wearing a rolled-sleeve chambray shirt, heavy brown work trousers with suspenders, scuffed leather boots, and a gray wool flat cap, trudging forward with his hands tucked into his pockets.",
+            "interesting": false,
+            "not_interesting": false
+        },
+        {
+            "id": "stern-floor-lady-69439f",
+            "name": "stern_floor_lady",
+            "description": " A sturdy, late-40s female dressed in a tailored knee-length floral day dress beneath a crisp white bib apron with a tall nurse's cap pinned to her pinned-up hair, briskly walking forward while tucking a wooden clipboard beneath her arm.",
+            "interesting": false,
+            "not_interesting": false
+        }
+    ]
+}
