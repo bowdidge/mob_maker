@@ -1,5 +1,6 @@
 Pipeline for creating large sets of 3d printed figures for background figures.
 
+![Screenshot of mob_maker in action.](/docs/mall_rats_screendump.jpg)
 + Summary
 
 This provides a semi-automated pipeline for generating 3d printed
