@@ -1,5 +1,6 @@
 Pipeline for creating large sets of 3d printed figures for background figures.
 
+** 3D figure generation not implemented yet.  Only image generation works.**
 ![Screenshot of mob_maker in action.](/docs/mall_rats_screendump.jpg)
 + Summary
 
